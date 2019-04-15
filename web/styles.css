@@ -1,32 +1,141 @@
+/* html, body {
+  margin: 0px;
+  padding: 0px;
+} */
 
+.btn {
+  font-size: 18px;
+  padding: 5px;
+  margin: 5px;
+  border-radius: 10px;
+  background-color: rgb(201, 201, 201);
+}
 
+.btn:hover {
+  background-color: #888;
+  cursor: pointer;
+}
+
+.page-input {
+  align-self: center;
+}
+
+.page-input-box {
+  width: 100px;
+  height: 40px;
+  text-align: center;
+  border-radius: 15px;
+  background-color: rgb(214, 214, 214);
+  padding: 3px;
+  font-size: 20px;
+}
+
+.page-name {
+  align-self: center;
+  min-width: 80px;
+  font-size: 25px;
+}
 
 .main-header {
   background-color: #55ccf2;
-  widht: 100%;
-  height: 200px;
+  width: 100%;
+  height: 30%;
+  border-radius: 30px;
+  padding: 5px;
 }
 
 .half-header {
-  border: 5px solid #56CCF2;
+  /* border: 5px solid rgb(29, 195, 250); */
   width: 100%;
   height: auto;
   display: flex;
 }
 
-.quater-header {
-  width: auto;
+.quater-header { 
+  width: 50%;
+  font-size: 1.4em;
   flex-grow: 1;
-  border: 5px solid #56CCF2;
+  margin: 10px;
+  align-self: center;
+}
+
+.page-quater {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  margin: 5px;
+}
+
+.input-header {
+  margin: 10px;
 }
 
 .buttons {
-  display: block;
+  display: flex;
+  flex-direction: column;
+
 }
 
 .start {
   width: 100%;
   display: flex;
+  flex-direction: column;
   margin: 5px auto 5px auto;
+  border-bottom: 1px solid darkgray;
+}
+
+.pages {
+  margin: 4px;
+}
+
+.btn-start {
+  background-color: #55ccf2;
+  color: #333;
+  align-self: center;
+}
+
+.btn-start:hover {
+  background-color: #2ba6cf;
+}
+
+.algorithm-select {
+  width: 120px;
+  font-size: 20px;
+  align-self: center;
+  border-radius: 5px;
+  border: 1px solid #55ccf2;
+  margin: 4px;
+  background-color: rgb(214, 214, 214);
+  text-align-last: center;
+  text-align: center;
+}
+
+.references-input {
+  flex-grow: 1;
+  width: 75%;
+}
+
+.references-input-box {
+  border-radius: 10px;
+  height: 60px;
+  width: 94%;
+  padding: 5px;
+  margin: 5px;
+  font-size: 19px;
+  background-color: rgb(214, 214, 214);
+}
+
+.references-name {
+  width: 15%;
+  font-size: 1.4em;
+  align-self: center;
+  min-width: 105px;
+}
+
+.clear-button {
+  align-self: center;
+  width: 90px;
+  font-size: 12px;
+  margin-bottom: 5px;
 
 }
