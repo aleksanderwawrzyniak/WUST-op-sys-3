@@ -3,7 +3,8 @@
 
 <head>
   <title>Page replacement algorithms</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="index.js" async></script>
 </head>
 
 <body>
@@ -13,36 +14,230 @@
         <div class="page-quater">
           <div class="page-name">Pages:</div>
           <div class="page-input">
-            <input class="page-input-box" type="number" value="1">
+            <input class="page-input-box" type="number" value="1" id="page-box">
           </div>
         </div>
         <div class="quater-header buttons">
-          <button type="button" class="btn btn-requests">Generate Random References</button>
-          <button type="button" class="btn btn-pages">Generate Random Page Number</button>
+          <button type="button" class="btn btn-requests" id="gen-refs-btn">Generate Random References</button>
+          <button type="button" class="btn btn-pages" id="gen-page-btn">Generate Random Page Number</button>
         </div>
       </div>
       <div class="half-header input-header">
-        <div class="references-name">
+        <!-- <div class="references-name">
           References:
-        </div>
+        </div> -->
         <div class="references-input">
-          <textarea type="text" class="references-input-box" placeholder="insert references here"></textarea>
+          <textarea type="text" class="references-input-box" placeholder="insert references here" id="refs-box"></textarea>
         </div>
       </div>
     </div>
     <div class="start">
-      <button type="button" class="btn btn-start">START EMULATION</button>
-      <select class="algorithm-select">
-        <option value="">Select</option>
-        <option value="">FIFO</option>
-        <option value="">LRU</option>
-        <option value="">ALRU</option>
-        <option value="">OPT</option>
-        <option value="">RAND</option>
+      <button type="button" class="btn btn-start" id="start-button">START EMULATION</button>
+      <select class="algorithm-select" id="alg-select">
+        <option value="none">Select</option>
+        <option value="fifo">FIFO</option>
+        <option value="lru">LRU</option>
+        <option value="alru">ALRU</option>
+        <option value="opt">OPT</option>
+        <option value="rand">RAND</option>
       </select>
-      <button class="clear-button" type="button">clear screen</button>
+      <button class="btn-clear" type="button" id="clear-button">clear screen</button>
     </div>
   </header>
+  <section>
+    <div class="output-field" id="outputs">
+      <div class="output-box">
+        <div class="output-header-box">
+          <strong>FIFO</strong> <br>
+          Page hits: <strong>1</strong> <br>
+          Page misses: <strong>6</strong> <br>
+        </div>
+        <div class="output-node final-node">
+          <span class="page">5</span>
+          <span class="page">6</span>
+          <span class="page">3</span>
+        </div>
+        <div class="output-section">
+          <div class="output-node output-miss-node">
+            <span class="page ref">1</span>
+            <span class="page">=></span>
+            <span class="page miss-page">X</span>
+            <span class="page">X</span>
+            <span class="page">X</span>
+          </div>
+          <div class="output-node output-miss-node">
+            <span class="page ref">3</span>
+            <span class="page">=></span>
+            <span class="page">1</span>
+            <span class="page miss-page">X</span>
+            <span class="page">X</span>
+          </div>
+          <div class="output-node output-miss-node">
+            <span class="page ref">0</span>
+            <span class="page">=></span>
+            <span class="page">1</span>
+            <span class="page">3</span>
+            <span class="page miss-page">X</span>
+          </div>
+          <div class="output-node">
+            <span class="page ref">3</span>
+            <span class="page">=></span>
+            <span class="page aim-page">1</span>
+            <span class="page hit-page">3</span>
+            <span class="page">0</span>
+          </div>
+          <div class="output-node output-miss-node">
+            <span class="page ref">5</span>
+            <span class="page">=></span>
+            <span class="page miss-page">1</span>
+            <span class="page">3</span>
+            <span class="page">0</span>
+          </div>
+          <div class="output-node output-miss-node">
+            <span class="page ref">6</span>
+            <span class="page">=></span>
+            <span class="page">5</span>
+            <span class="page miss-page">3</span>
+            <span class="page">0</span>
+          </div>
+          <div class="output-node output-miss-node">
+            <span class="page ref">3</span>
+            <span class="page">=></span>
+            <span class="page">5</span>
+            <span class="page">6</span>
+            <span class="page miss-page">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="output-box">
+        <div class="output-header-box">
+          <strong>OPT</strong> <br>
+          Page hits: <strong>8</strong> <br>
+          Page misses: <strong>6</strong> <br>
+        </div>
+        <div class="output-node final-node">
+          <span class="page">3</span>
+          <span class="page">0</span>
+          <span class="page">4</span>
+          <span class="page">2</span>
+        </div>
+        <div class="output-section">
+          <div class="output-node output-miss-node">
+            <span class="page ref">7</span>
+            <span class="page">=></span>
+            <span class="page miss-page">X</span>
+            <span class="page">X</span>
+            <span class="page">X</span>
+            <span class="page">X</span>
+          </div>
+          <div class="output-node output-miss-node">
+            <span class="page ref">0</span>
+            <span class="page">=></span>
+            <span class="page">7</span>
+            <span class="page miss-page">X</span>
+            <span class="page">X</span>
+            <span class="page">X</span>
+          </div>
+          <div class="output-node output-miss-node">
+            <span class="page ref">1</span>
+            <span class="page">=></span>
+            <span class="page">7</span>
+            <span class="page">0</span>
+            <span class="page miss-page">X</span>
+            <span class="page">X</span>
+          </div>
+          <div class="output-node output-miss-node">
+            <span class="page ref">2</span>
+            <span class="page">=></span>
+            <span class="page">7</span>
+            <span class="page">0</span>
+            <span class="page">1</span>
+            <span class="page miss-page">X</span>
+          </div>
+          <div class="output-node">
+            <span class="page ref">0</span>
+            <span class="page">=></span>
+            <span class="page">7</span>
+            <span class="page hit-page">0</span>
+            <span class="page">1</span>
+            <span class="page aim-page">2</span>
+          </div>
+          <div class="output-node output-miss-node">
+            <span class="page ref">3</span>
+            <span class="page">=></span>
+            <span class="page miss-page">7</span>
+            <span class="page">0</span>
+            <span class="page">1</span>
+            <span class="page">2</span>
+          </div>
+          <div class="output-node">
+            <span class="page ref">0</span>
+            <span class="page">=></span>
+            <span class="page aim-page">3</span>
+            <span class="page hit-page">0</span>
+            <span class="page">1</span>
+            <span class="page">2</span>
+          </div>
+          <div class="output-node output-miss-node">
+            <span class="page ref">4</span>
+            <span class="page">=></span>
+            <span class="page">3</span>
+            <span class="page">0</span>
+            <span class="page miss-page">1</span>
+            <span class="page">2</span>
+          </div>
+          <div class="output-node">
+            <span class="page ref">2</span>
+            <span class="page">=></span>
+            <span class="page">3</span>
+            <span class="page">0</span>
+            <span class="page aim-page">4</span>
+            <span class="page hit-page">2</span>
+          </div>
+          <div class="output-node">
+            <span class="page ref">3</span>
+            <span class="page">=></span>
+            <span class="page hit-page">3</span>
+            <span class="page">0</span>
+            <span class="page aim-page">4</span>
+            <span class="page">2</span>
+          </div>
+          <div class="output-node">
+            <span class="page ref">0</span>
+            <span class="page">=></span>
+            <span class="page">3</span>
+            <span class="page hit-page">0</span>
+            <span class="page aim-page">4</span>
+            <span class="page">2</span>
+          </div>
+          <div class="output-node">
+            <span class="page ref">3</span>
+            <span class="page">=></span>
+            <span class="page hit-page">3</span>
+            <span class="page">0</span>
+            <span class="page aim-page">4</span>
+            <span class="page">2</span>
+          </div>
+          <div class="output-node">
+            <span class="page ref">2</span>
+            <span class="page">=></span>
+            <span class="page">3</span>
+            <span class="page">0</span>
+            <span class="page aim-page">4</span>
+            <span class="page hit-page">2</span>
+          </div>
+          <div class="output-node">
+            <span class="page ref">3</span>
+            <span class="page">=></span>
+            <span class="page hit-page">3</span>
+            <span class="page">0</span>
+            <span class="page aim-page">4</span>
+            <span class="page">2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </body>
 
 </html>

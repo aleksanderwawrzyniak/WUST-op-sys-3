@@ -132,10 +132,97 @@
   min-width: 105px;
 }
 
-.clear-button {
+.btn-clear {
   align-self: center;
   width: 90px;
   font-size: 12px;
   margin-bottom: 5px;
+}
 
+.output-field {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+  color: #333;
+  justify-content: center;
+}
+
+.output-box {
+  border-left: 1px solid #333;
+  padding: 5px;
+}
+
+.output-box:last-child {
+  border-right: 1px solid #333;
+}
+
+.output-header-box {
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.output-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.output-node {
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+  color: #777;
+  border-bottom: 1px solid #777;
+}
+
+.output-node:last-child {
+  border-bottom: none;
+}
+
+.output-miss-node {
+  color: rgb(243, 162, 12);
+}
+
+.output-miss-node .aim-node {
+  color: white;
+  background-color: rgb(243, 162, 12);
+}
+
+.page {
+  margin: 4px;
+  font-size: 22px;
+  padding: 2px;
+}
+
+.miss-page {
+  background-color: red;
+  padding: 0px 4px;
+  color: white;
+}
+
+.ref {
+  font-weight: bold;
+  color: #333;
+}
+
+.aim-page {
+  background-color: #777;
+  color: white;
+}
+
+.hit-page {
+  color: rgb(6, 173, 6);
+  font-weight: bolder;
+  text-decoration: underline;
+}
+
+.final-node {
+  justify-content: center;
+  color: #333;
+}
+
+.hit-aim-page {
+  background-color: rgb(6, 173, 6);
+  color: white;
 }
