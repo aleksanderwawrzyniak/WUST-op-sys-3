@@ -8,15 +8,25 @@ var body = "[1] $ ||X|| X X\n[3] $ 1 ||X|| X\n[0] $ 1 3 ||X||\n[3] # |1| _3_ 0\n
 var out = "5 6 3"
 addOutput(head, body, out);
 
+var pageNumberChangedByUser = false;
+
 function ready() {
     document.getElementById("clear-button").addEventListener('click', clearOutputs);
-    document.getElementById('start-button').addEventListener('click', startEmulation);
+    document.getElementById('start-button').addEventListener('click', startSimulation);
     document.getElementById('refs-box').addEventListener('change', checkRefs);
     document.getElementById('page-box').addEventListener('change', checkPage);
     document.getElementById('gen-refs-btn').addEventListener('click', generateRefs);
     document.getElementById('gen-page-btn').addEventListener('click', generatePages);
+    document.getElementById('ref-num-box').addEventListener('change', checkRefsNum);
+    let closeButtons = document.getElementsByClassName('btn-close');
+    for (let i = 0; i < closeButtons.length; i++) {
+        closeButtons[i].addEventListener('click', closeOutputBox);
+    }
 }
 
+function closeOutputBox(event) {
+    event.target.parentElement.remove();
+}
 
 function clearOutputs() {
     let outputs = document.getElementsByClassName('output-field')[0];
@@ -25,7 +35,7 @@ function clearOutputs() {
     }
 }
 
-function startEmulation() {
+function startSimulation() {
     let selectedAlgorithm = document.getElementById('alg-select');
     let algorithm = selectedAlgorithm.options[selectedAlgorithm.selectedIndex].value;
     switch (algorithm) {
@@ -67,10 +77,19 @@ function checkPage(event) {
     }
 }
 
+function checkRefsNum(event) {
+    let numBox = event.target;
+    pageNumberChangedByUser = true;
+    if (numBox.value <= 0) {
+        numBox.value = 1;
+    }
+}
+
 function generateRefs() {
     let refs = "";
     let refsBox = document.getElementById('refs-box');
-    let n = Math.floor(Math.random() * 200) + 1;
+    let n = pageNumberChangedByUser? document.getElementById('ref-num-box').value : Math.floor(Math.random() * 200) + 1;
+    pageNumberChangedByUser = false;
 
     for (let i = 0; i < n; i++) {
         refs += Math.floor(Math.random() * 10);
@@ -91,6 +110,13 @@ function generatePages() {
 function addOutput(headerStr, bodyStr, resultStr) {
     let outputBox = document.createElement('div');
     outputBox.classList.add('output-box');
+
+    let closeButton = document.createElement('BUTTON');
+    closeButton.classList.add('btn', 'btn-close');
+    closeButton.innerText = '+';
+    closeButton.addEventListener('click', closeOutputBox);
+    outputBox.append(closeButton);
+
     let header = outputHeader(headerStr);
     console.log(header);
     outputBox.append(header);

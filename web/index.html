@@ -14,7 +14,7 @@
         <div class="page-quater">
           <div class="page-name">Pages:</div>
           <div class="page-input">
-            <input class="page-input-box" type="number" value="1" id="page-box">
+            <input class="input-box" type="number" value="1" id="page-box">
           </div>
         </div>
         <div class="quater-header buttons">
@@ -23,16 +23,17 @@
         </div>
       </div>
       <div class="half-header input-header">
-        <!-- <div class="references-name">
-          References:
-        </div> -->
+        <div class="references-name">
+          Number of references
+          <input class="input-box" type="number" value="1" id="ref-num-box">
+        </div>
         <div class="references-input">
           <textarea type="text" class="references-input-box" placeholder="insert references here" id="refs-box"></textarea>
         </div>
       </div>
     </div>
     <div class="start">
-      <button type="button" class="btn btn-start" id="start-button">START EMULATION</button>
+      <button type="button" class="btn btn-start" id="start-button">START SIMULATION</button>
       <select class="algorithm-select" id="alg-select">
         <option value="none">Select</option>
         <option value="fifo">FIFO</option>
@@ -47,6 +48,7 @@
   <section>
     <div class="output-field" id="outputs">
       <div class="output-box">
+        <button class="btn btn-close" type="button">+</button>
         <div class="output-header-box">
           <strong>FIFO</strong> <br>
           Page hits: <strong>1</strong> <br>
@@ -110,6 +112,7 @@
         </div>
       </div>
       <div class="output-box">
+        <button class="btn btn-close" type="button">+</button>
         <div class="output-header-box">
           <strong>OPT</strong> <br>
           Page hits: <strong>8</strong> <br>

@@ -20,7 +20,7 @@
   align-self: center;
 }
 
-.page-input-box {
+.input-box {
   width: 100px;
   height: 40px;
   text-align: center;
@@ -158,7 +158,8 @@
 }
 
 .output-header-box {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  margin-top: 18px;
   text-align: center;
   font-size: 18px;
 }
@@ -225,4 +226,29 @@
 .hit-aim-page {
   background-color: rgb(6, 173, 6);
   color: white;
+}
+
+.btn-close {
+  font-size: 20px;
+  margin: 0px;
+  width: 30px;
+  height: 30px;
+  padding: 0px;
+  border-radius: 80%;
+  font-weight: bolder;
+  transform: rotate(45deg);
+  background-color: white;
+  color: #333;
+  float: right;
+  top: 0;
+  border: none;
+}
+
+.btn-close:hover {
+  background-color: white;
+  font-size: 30px;
+}
+
+.btn:focus {
+  outline: 0;
 }
