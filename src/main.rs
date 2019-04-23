@@ -1,27 +1,164 @@
-mod memory;
-use memory::*;
+#![feature(proc_macro_hygiene, decl_macro)]
 
+#[macro_use]
+extern crate rocket;
+#[macro_use]
+extern crate rocket_contrib;
+#[macro_use]
+extern crate serde_derive;
 extern crate rand;
 
+mod memory;
+
+use memory::utils::*;
+use memory::*;
+use rocket::Data;
+use rocket_contrib::json::Json;
+use std::io::Read;
+// use serde_json::json::{Json, JsonValue};
+
+#[derive(Debug, Deserialize)]
+struct RequestJson {
+    pages: usize,
+    requests: String,
+}
+
+#[derive(Debug, Serialize)]
+struct OutputJson {
+    // steps: usize,
+    hits: u64,
+    misses: u64,
+    output_stage: String,
+    body: String,
+}
+
+#[post(
+    "/fifo",
+    format = "text/plain; charset=UTF-8",
+    data = "<plain_request>"
+)]
+fn fifo(plain_request: Data) -> Json<OutputJson> {
+    let mut string_request = String::new();
+    plain_request
+        .open()
+        .read_to_string(&mut string_request)
+        .unwrap();
+    println!("string request: {}", string_request);
+    let request: RequestJson = serde_json::from_str(&string_request).unwrap();
+
+    let mut mem = Memory::new(request.pages);
+    let refs = split_references(request.requests);
+
+    mem.simulate_fifo(&refs);
+
+    let output = OutputJson {
+        hits: mem.hits(),
+        misses: mem.misses(),
+        output_stage: mem.last_state(),
+        body: mem.outcome(),
+    };
+
+    Json(output)
+}
+
+#[post("/lru", format = "text/plain; charset=UTF-8", data = "<plain_request>")]
+fn lru(plain_request: Data) -> Json<OutputJson> {
+    let mut string_request = String::new();
+    plain_request
+        .open()
+        .read_to_string(&mut string_request)
+        .unwrap();
+    let request: RequestJson = serde_json::from_str(&string_request).unwrap();
+    let mut mem = Memory::new(request.pages);
+    let refs = split_references(request.requests);
+    mem.simulate_lru(&refs);
+
+    let output = OutputJson {
+        hits: mem.hits(),
+        misses: mem.misses(),
+        output_stage: mem.last_state(),
+        body: mem.outcome(),
+    };
+
+    Json(output)
+}
+
+#[post(
+    "/alru",
+    format = "text/plain; charset=UTF-8",
+    data = "<plain_request>"
+)]
+fn alru(plain_request: Data) -> Json<OutputJson> {
+    let mut string_request = String::new();
+    plain_request
+        .open()
+        .read_to_string(&mut string_request)
+        .unwrap();
+    let request: RequestJson = serde_json::from_str(&string_request).unwrap();
+    let mut mem = Memory::new(request.pages);
+    let refs = split_references(request.requests);
+    mem.simulate_alru(&refs);
+
+    let output = OutputJson {
+        hits: mem.hits(),
+        misses: mem.misses(),
+        output_stage: mem.last_state(),
+        body: mem.outcome(),
+    };
+
+    Json(output)
+}
+
+#[post("/opt", format = "text/plain; charset=UTF-8", data = "<plain_request>")]
+fn opt(plain_request: Data) -> Json<OutputJson> {
+    let mut string_request = String::new();
+    plain_request
+        .open()
+        .read_to_string(&mut string_request)
+        .unwrap();
+    let request: RequestJson = serde_json::from_str(&string_request).unwrap();
+    let mut mem = Memory::new(request.pages);
+    let refs = split_references(request.requests);
+    mem.simulate_opt(&refs);
+
+    let output = OutputJson {
+        hits: mem.hits(),
+        misses: mem.misses(),
+        output_stage: mem.last_state(),
+        body: mem.outcome(),
+    };
+
+    Json(output)
+}
+
+#[post(
+    "/rand",
+    format = "text/plain; charset=UTF-8",
+    data = "<plain_request>"
+)]
+fn rand(plain_request: Data) -> Json<OutputJson> {
+    let mut string_request = String::new();
+    plain_request
+        .open()
+        .read_to_string(&mut string_request)
+        .unwrap();
+    let request: RequestJson = serde_json::from_str(&string_request).unwrap();
+    let mut mem = Memory::new(request.pages);
+    let refs = split_references(request.requests);
+    mem.simulate_rand(&refs);
+
+    let output = OutputJson {
+        hits: mem.hits(),
+        misses: mem.misses(),
+        output_stage: mem.last_state(),
+        body: mem.outcome(),
+    };
+
+    Json(output)
+}
+
 fn main() {
-    println!("Hello, world!");
-    let (fifo_result, fifo_outcome) = fifo(3, String::from("1 3 0 3 5 6 3"));
-    println!("{}", fifo_result);
-    println!("{}", fifo_outcome);
-
-    let (fifo_result, fifo_outcome) = fifo(4, String::from("3 5 6 3 2 6 5 7 8 6 9 1 2 4 5 4 6 5 7 9 8 6 7 6 5 6 5 6 5 3 2"));
-    println!("{}", fifo_result);
-    println!("{}", fifo_outcome);
-
-    let (lru_result, lru_outcome) = lru(4, String::from("3 5 6 3 2 6 5 7 8 6 9 1 2 4 5 4 6 5 7 9 8 6 7 6 5 6 5 6 5 3 2"));
-    println!("{}", lru_result);
-    println!("{}", lru_outcome);
-
-    let (opt_result, opt_outcome) = opt(4, String::from("3 5 6 3 2 6 5 7 8 6 9 1 2 4 5 4 6 5 7 9 8 6 7 6 5 6 5 6 5 3 2"));
-    println!("{}", opt_result);
-    println!("{}", opt_outcome);
-
-    let (rand_result, rand_outcome) = rand(4, String::from("3 5 6 3 2 6 5 7 8 6 9 1 2 4 5 4 6 5 7 9 8 6 7 6 5 6 5 6 5 3 2"));
-    println!("{}", rand_result);
-    println!("{}", rand_outcome);
+    rocket::ignite()
+        .mount("/", routes![fifo, alru, lru, opt, rand])
+        .launch();
 }

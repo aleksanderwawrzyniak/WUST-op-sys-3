@@ -3,10 +3,9 @@ if (document.readyState == 'loading') {
 } else {
     ready();
 }
-var head = 'FIFO\nPage hits: 1\nPage misses: 6';
 var body = "[1] $ ||X|| X X\n[3] $ 1 ||X|| X\n[0] $ 1 3 ||X||\n[3] # |1| _3_ 0\n[5] $ ||1|| 3 0\n[6] $ 5 ||3|| 0\n[3] $ 5 3 ||0||\n";
 var out = "5 6 3"
-addOutput(head, body, out);
+addOutput("FIFO", 1, 6, body, out);
 
 var pageNumberChangedByUser = false;
 
@@ -38,31 +37,32 @@ function clearOutputs() {
 function startSimulation() {
     let selectedAlgorithm = document.getElementById('alg-select');
     let algorithm = selectedAlgorithm.options[selectedAlgorithm.selectedIndex].value;
-    switch (algorithm) {
-        case "none":
-            alert("Please choose the algorithm to emulate before clicking START EMULATION button");
-            break;
-        case "fifo":
-            //todo
-            console.log(algorithm + " being emulated");
-            break;
-        case "lru":
-            //todo
-            console.log(algorithm + " being emulated");
-            break;
-        case "alru":
-            //todo
-            console.log(algorithm + " being emulated");
-            break;
-        case "opt":
-            //todo
-            console.log(algorithm + " being emulated");
-            break;
-        case "rand":
-            //todo
-            console.log(algorithm + " being emulated");
-            break;
+    if (algorithm === 'none') {
+        alert('Please choose the algorithm first');
+        return;
     }
+    let request = "http://localhost:8001/" + algorithm;
+    let retJson;
+    let xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+        if(this.readyState == 4 && this.status == 200) {
+            retJson = JSON.parse(this.responseText);
+            addOutput(algorithm.toUpperCase(), retJson.hits, retJson.misses, retJson.body, retJson.output_stage);
+        }
+    };
+
+    let pageNum = document.getElementById('page-box').value;
+    let references = document.getElementById('refs-box').value;
+
+    let json = {pages: 1, requests: ''};
+    json.pages = parseInt(pageNum);
+    json.requests = references;
+
+    xhttp.open("POST", request, true);
+    xhttp.send(JSON.stringify(json));
+
+
 }
 
 function checkRefs(event) {
@@ -87,16 +87,22 @@ function checkRefsNum(event) {
 
 function generateRefs() {
     let refs = "";
+    let n = 0;
     let refsBox = document.getElementById('refs-box');
-    let n = pageNumberChangedByUser? document.getElementById('ref-num-box').value : Math.floor(Math.random() * 200) + 1;
-    pageNumberChangedByUser = false;
+    if (pageNumberChangedByUser) {
+        n = document.getElementById('ref-num-box').value;
+        pageNumberChangedByUser = false;
+    } else {
+        n = Math.floor(Math.random() * 200) + 1;
+        document.getElementById('ref-num-box').value = n;
+    }
 
     for (let i = 0; i < n; i++) {
         refs += Math.floor(Math.random() * 10);
         refs += ' ';
     }
 
-    refsBox.value = refs;
+    refsBox.value = refs.trim();
 }
 
 function generatePages() {
@@ -107,7 +113,7 @@ function generatePages() {
     }
 }
 
-function addOutput(headerStr, bodyStr, resultStr) {
+function addOutput(algorithmName, hits, misses, bodyStr, resultStr) {
     let outputBox = document.createElement('div');
     outputBox.classList.add('output-box');
 
@@ -117,8 +123,7 @@ function addOutput(headerStr, bodyStr, resultStr) {
     closeButton.addEventListener('click', closeOutputBox);
     outputBox.append(closeButton);
 
-    let header = outputHeader(headerStr);
-    console.log(header);
+    let header = outputHeader(algorithmName, hits, misses);
     outputBox.append(header);
 
     let result = outputFinal(resultStr);
@@ -131,17 +136,13 @@ function addOutput(headerStr, bodyStr, resultStr) {
     document.getElementById('outputs').append(outputBox);
 }
 
-function outputHeader(header) {
+function outputHeader(name, hits, misses) {
     let retHeader = document.createElement('div');
     retHeader.classList.add('output-header-box');
-    let headerParts = header.split('\n');
-    let algName = headerParts[0];
-    let pagesHit = headerParts[1].replace(/\D/g, '');
-    let pagesMiss = headerParts[2].replace(/\D/g, '');
     let content = `
-        <strong>${algName}</strong> <br>
-        Page hits: <strong>${pagesHit}</strong> <br>
-        Page misses: <strong>${pagesMiss}</strong> <br>
+        <strong>${name}</strong> <br>
+        Page hits: <strong>${hits}</strong> <br>
+        Page misses: <strong>${misses}</strong> <br>
     `
     retHeader.innerHTML = content;
     return retHeader;
@@ -166,7 +167,6 @@ function outputBody(body) {
     let outputSection = document.createElement('div');
     outputSection.classList.add('output-section');
     let nodes = body.trim().split('\n');
-    console.log(nodes);
 
     for (let i = 0; i < nodes.length; i++) {
         // in case that .trim() do not work
@@ -179,7 +179,6 @@ function outputBody(body) {
 }
 
 function makeNode(nodeStr) {
-    console.log(nodeStr);
     let node = document.createElement('div');
     node.classList.add('output-node');
 

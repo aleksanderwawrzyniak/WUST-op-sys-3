@@ -1,8 +1,7 @@
 mod page;
-mod utils;
+pub mod utils;
 
 use page::Page;
-use utils::*;
 
 use rand::prelude::*;
 
@@ -16,7 +15,8 @@ pub struct Memory {
     last_used_position: usize,
     no_of_pages: usize,
     outcome_string: String,
-    result: String,
+    page_hits: u64,
+    page_misses: u64,
 }
 
 impl Memory {
@@ -32,7 +32,8 @@ impl Memory {
             last_used_position: no_of_pages - 1,
             no_of_pages,
             outcome_string: String::new(),
-            result: String::new(),
+            page_hits: 0,
+            page_misses: 0,
         }
     }
 
@@ -63,14 +64,12 @@ impl Memory {
             self.last_used_position = pos;
         }
 
-        self.result = format!(
-            "FIFO\npage_hits: {}\npage_misses: {}\n",
-            page_hits, page_faults
-        );
+        self.page_hits = page_hits;
+        self.page_misses = page_faults;
     }
 
-    // LRU Least Recently Used
-    pub fn simulate_lru(&mut self, references: &[u64]) {
+    // ALRU 
+    pub fn simulate_alru(&mut self, references: &[u64]) {
         //TODO
         let mut page_faults: u64 = 0;
         let mut page_hits: u64 = 0;
@@ -89,15 +88,15 @@ impl Memory {
                         self.last_used_position = pos;
                         pos = self.next_pos();
                         self.push_step(Hit::Miss(pos, Some(self.last_used_position)), reference);
-                        self.pages[pos] = Some(Page::new_taken(reference));
+                        self.pages[pos] = Some(Page::new_taken(reference, 1_u64));
                     } else {
                         self.push_step(Hit::Miss(pos, None), reference);
-                        self.pages[pos] = Some(Page::new_taken(reference));
+                        self.pages[pos] = Some(Page::new_taken(reference, 1_u64));
                     }
                 }
                 None => {
                     self.push_step(Hit::Miss(pos, None), reference);
-                    self.pages[pos] = Some(Page::new_taken(reference));
+                    self.pages[pos] = Some(Page::new_taken(reference, 1_u64));
                 }
             }
 
@@ -105,10 +104,8 @@ impl Memory {
             self.last_used_position = pos;
         }
 
-        self.result = format!(
-            "LRU\npage hits: {}\npage misses: {}\n",
-            page_hits, page_faults
-        );
+        self.page_hits = page_hits;
+        self.page_misses = page_faults;
     }
 
     // OPT optimal
@@ -120,7 +117,7 @@ impl Memory {
             let mut position: Option<usize> = None;
             let mut pos = self.next_pos();
 
-            if self.find_reference(reference, &mut position) {
+            if self.find_reference_lru(reference, &mut position) {
                 page_hits += 1;
                 self.push_step(Hit::Hit(position.unwrap(), pos), reference);
                 continue;
@@ -142,10 +139,8 @@ impl Memory {
             page_faults += 1;
         }
 
-        self.result = format!(
-            "OPT\npage hits: {}\npage misses: {}\n",
-            page_hits, page_faults
-        );
+        self.page_hits = page_hits;
+        self.page_misses = page_faults;
     }
 
     // RAND
@@ -181,15 +176,48 @@ impl Memory {
             page_faults += 1;
         }
 
-        self.result = format!(
-            "RAND\npage_hits: {}\npage misses: {}\n",
-            page_hits, page_faults
-        );
+        self.page_hits = page_hits;
+        self.page_misses = page_faults;
     }
 
-    // aproksymatywny LRU
-    pub fn simulate_alru(&mut self, references: &[u64]) {
+    // LRU Least Recently Used
+    pub fn simulate_lru(&mut self, references: &[u64]) {
         //TODO
+        let mut page_faults: u64 = 0;
+        let mut page_hits: u64 = 0;
+
+        for &reference in references {
+            let mut position: Option<usize> = None;
+            let mut pos = self.next_pos();
+            if self.find_reference_lru(reference, &mut position) {
+                page_hits += 1;
+                self.push_step(Hit::Hit(position.unwrap(), pos), reference);
+                continue;
+            }
+            match self.pages[pos] {
+                Some(page) => {
+                    if page.is_taken() {
+                        self.last_used_position = pos;
+                        pos = self.next_pos();
+                        self.push_step(Hit::Miss(pos, Some(self.last_used_position)), reference);
+                        self.pages[pos] = Some(Page::new_taken(reference, self.no_of_pages as u64 - 1_u64));
+                    } else {
+                        self.push_step(Hit::Miss(pos, None), reference);
+                        self.pages[pos] = Some(Page::new_taken(reference, self.no_of_pages as u64 - 1_u64));
+                    }
+                }
+                None => {
+                    self.push_step(Hit::Miss(pos, None), reference);
+                    self.pages[pos] = Some(Page::new_taken(reference, self.no_of_pages as u64 - 1_u64));
+                }
+            }
+
+            page_faults += 1;
+            self.last_used_position = pos;
+        }
+
+        self.page_hits = page_hits;
+        self.page_misses = page_faults;
     }
 
     pub fn find_pos_with_longest_length(&self, current_step: usize, refs: &[u64]) -> usize {
@@ -199,7 +227,6 @@ impl Memory {
         }
         for (i, page) in self.pages.iter().enumerate() {
             for (step, &value) in refs[current_step..].iter().enumerate() {
-                println!("{:?}", (step, &value));
                 if page.unwrap().value() == value {
                     let length = step as u64;
                     if vec[i] > length {
@@ -215,11 +242,36 @@ impl Memory {
 
     fn next_pos(&mut self) -> usize {
         let pos = (self.last_used_position + 1) % self.no_of_pages;
-        println!("{}", pos);
         pos
     }
 
     fn find_reference(&mut self, reference: u64, position: &mut Option<usize>) -> bool {
+        let mut found = false;
+
+        for (i, option) in self.pages.iter_mut().enumerate() {
+            match option {
+                Some(page) => {
+                    if page.value() == reference {
+                        page.set_taken(true);
+                        page.set_ticks(1_u64);
+                        found = true;
+                        *position = Some(i);
+                    } else {
+                        if page.ticks() > 0 {
+                            page.set_ticks(page.ticks() - 1_u64);
+                        } else {
+                            page.set_taken(false);
+                        }
+                    }
+                }
+                None => {}
+            }
+        }
+
+        found
+    }
+
+    fn find_reference_lru(&mut self, reference: u64, position: &mut Option<usize>) -> bool {
         let mut found = false;
 
         for (i, option) in self.pages.iter_mut().enumerate() {
@@ -228,7 +280,7 @@ impl Memory {
                 Some(page) => {
                     if page.value() == reference {
                         page.set_taken(true);
-                        page.set_ticks(1_u64);
+                        page.set_ticks(self.no_of_pages as u64 - 1_u64);
                         found = true;
                         *position = Some(i);
                     } else {
@@ -347,40 +399,34 @@ impl Memory {
         line.push('\n');
         self.outcome_string.push_str(line.as_ref());
     }
-}
 
-pub fn fifo(pages: usize, references: String) -> (String, String) {
-    let mut mem = Memory::new(pages);
-    let refs = split_references(references);
-    println!("{:?}", &refs);
-    mem.simulate_fifo(&refs);
+    pub fn last_state(&self) -> String {
+        let mut line = String::new();
+        for option in self.pages.iter() {
+            line.push_str(
+                format!(
+                    "{}",
+                    match option {
+                        Some(page) => page.value().to_string(),
+                        None => "X".to_owned(),
+                    }
+                )
+                .as_ref(),
+            );
+            line.push(' ');
+        }
+        line.trim_end().to_owned()
+    }
 
-    (mem.result, mem.outcome_string)
-}
+    pub fn hits(&self) -> u64 {
+        self.page_hits
+    }
 
-pub fn lru(pages: usize, references: String) -> (String, String) {
-    let mut mem = Memory::new(pages);
-    let refs = split_references(references);
-    println!("{:?}", &refs);
-    mem.simulate_lru(&refs);
+    pub fn misses(&self) -> u64 {
+        self.page_misses
+    }
 
-    (mem.result, mem.outcome_string)
-}
-
-pub fn opt(pages: usize, references: String) -> (String, String) {
-    let mut mem = Memory::new(pages);
-    let refs = split_references(references);
-    println!("{:?}", &refs);
-    mem.simulate_opt(&refs);
-
-    (mem.result, mem.outcome_string)
-}
-
-pub fn rand(pages: usize, references: String) -> (String, String) {
-    let mut mem = Memory::new(pages);
-    let refs = split_references(references);
-    println!("{:?}", &refs);
-    mem.simulate_rand(&refs);
-
-    (mem.result, mem.outcome_string)
+    pub fn outcome(&self) -> String {
+        self.outcome_string.clone()
+    }
 }

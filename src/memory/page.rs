@@ -14,10 +14,10 @@ impl Page {
         }
     }
 
-    pub fn new_taken(value: u64) -> Self {
+    pub fn new_taken(value: u64, ticks: u64) -> Self {
         Page {
             value,
-            taken_ticks: 1_u64,
+            taken_ticks: ticks,
             taken: true,
         }
     }
@@ -32,10 +32,6 @@ impl Page {
 
     pub fn ticks(&self) -> u64 {
         self.taken_ticks
-    }
-
-    pub fn set_value(&mut self, val: u64) {
-        self.value = val;
     }
 
     pub fn set_taken(&mut self, state: bool) {
