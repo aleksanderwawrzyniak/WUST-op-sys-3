@@ -3,11 +3,8 @@ if (document.readyState == 'loading') {
 } else {
     ready();
 }
-var body = "[1] $ ||X|| X X\n[3] $ 1 ||X|| X\n[0] $ 1 3 ||X||\n[3] # |1| _3_ 0\n[5] $ ||1|| 3 0\n[6] $ 5 ||3|| 0\n[3] $ 5 3 ||0||\n";
-var out = "5 6 3"
-addOutput("FIFO", 1, 6, body, out);
 
-var pageNumberChangedByUser = false;
+let pageNumberChangedByUser = false;
 
 function ready() {
     document.getElementById("clear-button").addEventListener('click', clearOutputs);
